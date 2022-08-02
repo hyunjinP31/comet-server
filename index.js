@@ -72,6 +72,28 @@ app.get('/commingsoon', async (req, res)=>{
         }
     )
 })
+//회원정보 불러오기
+app.get('/user/:userId', async (req, res)=>{
+    const userId = req.params.userId;
+    connection.query(
+        `select * from members where userId='${userId}'`,
+        (err, rows)=>{
+            res.send(rows);
+        }
+    )
+})
+//회원가입 insert
+app.post('/createuser', async (req, res)=>{
+    const body = req.body;
+    const {userId,userPw,userBirth,userGender,userPhone,userName,userEmail,userAddr1,userAddr2}= body;
+    connection.query(
+        `insert into members(userId, userPw, userBirth, userGender, userPhone, userName, userEmail, userAddr1, userAddr2)
+        values ('${userId}', '${userPw}', '${userBirth}', '${userGender}', '${userPhone}', '${userName}', '${userEmail}', '${userAddr1}', '${userAddr2}')`,
+        (err,rows)=>{
+            if(err) console.log(err);
+        }
+    )
+})
 
 //서버 돌리기
 app.listen(port, ()=>{
