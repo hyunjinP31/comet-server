@@ -4,6 +4,8 @@ const app = express();
 const port = process.env.PORT || 3001;
 const mysql = require('mysql');
 const fs = require('fs');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 const dbinfo = fs.readFileSync('./database.json');
 const conf = JSON.parse(dbinfo);
@@ -84,15 +86,23 @@ app.get('/user/:userId', async (req, res)=>{
 })
 //회원가입 insert
 app.post('/createuser', async (req, res)=>{
-    const body = req.body;
-    const {userId,userPw,userBirth,userGender,userPhone,userName,userEmail,userAddr1,userAddr2}= body;
-    connection.query(
-        `insert into members(userId, userPw, userBirth, userGender, userPhone, userName, userEmail, userAddr1, userAddr2)
-        values ('${userId}', '${userPw}', '${userBirth}', '${userGender}', '${userPhone}', '${userName}', '${userEmail}', '${userAddr1}', '${userAddr2}')`,
-        (err,rows)=>{
-            if(err) console.log(err);
-        }
-    )
+    let plainPass = req.body.userPw;
+    let lockedPass = '';
+    const {userId,userBirth,userGender,userPhone,userName,userEmail,userAddr1,userAddr2}= req.body;
+    if(Boolean(plainPass) != false){
+        bcrypt.genSalt(saltRounds, function(err, salt) {
+            bcrypt.hash(plainPass, salt, function(err, hash) {
+                lockedPass = hash;
+                connection.query(
+                    `insert into members(userId, userPw, userBirth, userGender, userPhone, userName, userEmail, userAddr1, userAddr2)
+                    values ('${userId}', '${lockedPass}', '${userBirth}', '${userGender}', '${userPhone}', '${userName}', '${userEmail}', '${userAddr1}', '${userAddr2}')`,
+                    (err,rows)=>{
+                        if(err) console.log(err);
+                    }
+                )
+            });
+        });
+    }
 })
 
 //서버 돌리기
