@@ -107,20 +107,19 @@ app.post('/createuser', async (req, res)=>{
 //로그인 match
 app.post('/loginuser', async (req, res)=>{
     const { userId, userPw } = req.body;
-    console.log(userId, userPw);
     connection.query(
         `select * from members where userId='${userId}'`,
         (err, rows)=>{
             if(err) return console.log(err);
-            if( rows != undefined){
+            if(rows != undefined){
                 if(rows[0] == undefined){
-                    res.send('아이디를 찾을 수 없습니다.');
+                    res.send(undefined);
                 }else{
                     bcrypt.compare(userPw, rows[0].userPw, function(err, result) {
                         if(result ==  true){
-                            res.send(rows[0])
+                            res.send(rows[0]);
                         }else{
-                            res.send("비밀번호가 맞지 않습니다.")
+                            res.send("password undefined");
                         }
                     });
                 }
