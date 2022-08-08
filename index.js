@@ -6,9 +6,11 @@ const mysql = require('mysql');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+const multer = require('multer');
 
 const dbinfo = fs.readFileSync('./database.json');
 const conf = JSON.parse(dbinfo);
+
 
 const connection = mysql.createConnection({
     host: conf.host,
@@ -19,6 +21,24 @@ const connection = mysql.createConnection({
 });
 app.use(express.json());
 app.use(cors());
+app.use("/upload", express.static('upload'));
+
+const storage = multer.diskStorage({
+    destination: "./upload",
+    filename: function(req, file, cb){
+        cb(null, file.originalname);
+    }
+})
+const upload = multer({
+    storage: storage,
+    limits: { fieldSize: 1000000}
+})
+app.post('/upload', upload.single('projectImg'), function(req, res, next){
+    console.log(req)
+    res.send({
+        projectImg: req.file.filename 
+    })
+})
 
 //인기 키워드 프로젝트
 app.get('/topranking', async (req, res)=>{
@@ -124,6 +144,42 @@ app.post('/loginuser', async (req, res)=>{
                     });
                 }
             }
+        }
+    )
+})
+//프로젝트 상세페이지
+app.get('/projectdetail/:id', async (req, res)=>{
+    const id = req.params.id;
+    connection.query(
+        `select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where id=${id}`,
+        (err, rows)=>{
+            if(err) return console.log(err);
+            else res.send(rows[0]);
+        }
+    )
+})
+//조회수 업데이트
+app.put('/projectview/:id', async (req, res)=>{
+    const id = req.params.id;
+    const {view} = req.body;
+    connection.query(
+        `update projects set projectHits="${view}" where id=${id}`,
+        (err, result)=>{
+            res.send(result);
+            if(err) console.log(err);
+        }
+    )
+})
+//상품 등록하기
+app.post('/createproject', async (req, res)=>{
+    const { sellerId, sellerName, projectTitle, projectImg, projectPrice, projectVolume, projectGoal, projectEndDate, projectType, projectKeyword } = req.body;
+    connection.query(
+        `insert into projects ('sellerId', 'sellerName', 'projectTitle', 'projectPrice', 'projectVolume', 'projectImg', 'projectGoal', 'projectEndDate', 'projectType', 'projectKeyword')
+        value ('${sellerId}', '${sellerName}', '${projectTitle}', '${projectPrice}', '${projectVolume}', '${projectImg}', '${projectGoal}', '${projectEndDate}', '${projectType}', '${projectKeyword}')`,
+        (err, result) => {
+            if(err) console.log(err);
+            console.log(result)
+            res.send('it uploaded')
         }
     )
 })
