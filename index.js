@@ -21,7 +21,7 @@ const connection = mysql.createConnection({
 });
 app.use(express.json());
 app.use(cors());
-app.use("/upload", express.static('upload'));
+app.use("/upload", express.static("upload"));
 
 const storage = multer.diskStorage({
     destination: "./upload",
@@ -34,7 +34,6 @@ const upload = multer({
     limits: { fieldSize: 1000000}
 })
 app.post('/upload', upload.single('projectImg'), function(req, res, next){
-    console.log(req)
     res.send({
         projectImg: req.file.filename 
     })
@@ -52,7 +51,7 @@ app.get('/topranking', async (req, res)=>{
 //마감임박 키워드 프로젝트
 app.get('/imminent', async (req, res)=>{
     connection.query(
-        "select * from projects where projectKeyword like '%마감임박%' order by projectEndDate asc limit 12",
+        "select *, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%마감임박%' order by projectEndDate asc limit 10",
         (err, rows)=>{
             res.send(rows);
         }
@@ -174,12 +173,11 @@ app.put('/projectview/:id', async (req, res)=>{
 app.post('/createproject', async (req, res)=>{
     const { sellerId, sellerName, projectTitle, projectImg, projectPrice, projectVolume, projectGoal, projectEndDate, projectType, projectKeyword } = req.body;
     connection.query(
-        `insert into projects ('sellerId', 'sellerName', 'projectTitle', 'projectPrice', 'projectVolume', 'projectImg', 'projectGoal', 'projectEndDate', 'projectType', 'projectKeyword')
-        value ('${sellerId}', '${sellerName}', '${projectTitle}', '${projectPrice}', '${projectVolume}', '${projectImg}', '${projectGoal}', '${projectEndDate}', '${projectType}', '${projectKeyword}')`,
+        `insert into projects (sellerId, sellerName, projectTitle, projectPrice, projectImg, projectGoal, projectEndDate, projectType)
+        values ('${sellerId}', '${sellerName}', '${projectTitle}', ${projectPrice}, '${projectImg}', '${projectGoal}', '${projectEndDate}', '${projectType}')`,
         (err, result) => {
             if(err) console.log(err);
-            console.log(result)
-            res.send('it uploaded')
+            res.send('it uploaded');
         }
     )
 })
