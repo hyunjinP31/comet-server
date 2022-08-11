@@ -87,7 +87,7 @@ app.get('/potenup', async (req, res)=>{
 //공개예점 키워드 프로젝트
 app.get('/commingsoon', async (req, res)=>{
     connection.query(
-        "select * from projects where projectKeyword like '%공개예정%' order by projectStartDate asc limit 9",
+        "select * from projects where projectKeyword like '%공개예정%' order by projectStartDate asc limit 12",
         (err, rows)=>{
             res.send(rows);
         }
@@ -178,6 +178,17 @@ app.post('/createproject', async (req, res)=>{
         (err, result) => {
             if(err) console.log(err);
             res.send('it uploaded');
+        }
+    )
+})
+//프로젝트 키워드로 불러오기
+app.get('/projectlist/:name', async (req, res)=>{
+    const name = req.params.name;
+    connection.query(
+        `select * from projects where projectKeyword like '%${name}%'`,
+        (err, rows) => {
+            if(err) console.log(err);
+            res.send(rows);
         }
     )
 })
