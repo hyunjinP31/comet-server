@@ -42,7 +42,7 @@ app.post('/upload', upload.single('projectImg'), function(req, res, next){
 //인기 키워드 프로젝트
 app.get('/topranking', async (req, res)=>{
     connection.query(
-        "select * from projects where projectKeyword like '%인기%' order by projectAchieve desc limit 12",
+        "select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%인기%' order by projectAchieve desc limit 12",
         (err, rows)=>{
             res.send(rows);
         }
@@ -51,7 +51,7 @@ app.get('/topranking', async (req, res)=>{
 //마감임박 키워드 프로젝트
 app.get('/imminent', async (req, res)=>{
     connection.query(
-        "select *, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%마감임박%' order by projectEndDate asc limit 10",
+        "select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%마감임박%' order by projectEndDate asc limit 10",
         (err, rows)=>{
             res.send(rows);
         }
@@ -60,7 +60,7 @@ app.get('/imminent', async (req, res)=>{
 //테마 키워드 프로젝트
 app.get('/theme', async (req, res)=>{
     connection.query(
-        "select * from projects where projectKeyword like '%테마%' limit 10",
+        "select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%테마%' limit 10",
         (err, rows)=>{
             res.send(rows);
         }
@@ -69,7 +69,7 @@ app.get('/theme', async (req, res)=>{
 //신규 키워드 프로젝트
 app.get('/newproject', async (req, res)=>{
     connection.query(
-        "select * from projects where projectKeyword like '%신규%' order by projectStartDate desc limit 10",
+        "select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%신규%' order by projectStartDate desc limit 10",
         (err, rows)=>{
             res.send(rows);
         }
@@ -78,7 +78,7 @@ app.get('/newproject', async (req, res)=>{
 //주목 키워드 프로젝트
 app.get('/potenup', async (req, res)=>{
     connection.query(
-        "select * from projects where projectKeyword like '%주목%' order by projectHits desc limit 9",
+        "select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%주목%' order by projectHits desc limit 9",
         (err, rows)=>{
             res.send(rows);
         }
@@ -87,7 +87,7 @@ app.get('/potenup', async (req, res)=>{
 //공개예점 키워드 프로젝트
 app.get('/commingsoon', async (req, res)=>{
     connection.query(
-        "select * from projects where projectKeyword like '%공개예정%' order by projectStartDate asc limit 12",
+        "select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%공개예정%' order by projectStartDate asc limit 12",
         (err, rows)=>{
             res.send(rows);
         }
@@ -189,6 +189,27 @@ app.get('/projectlist/:name', async (req, res)=>{
         (err, rows) => {
             if(err) console.log(err);
             res.send(rows);
+        }
+    )
+})
+//좋아요 기능
+app.get('/getheart/:userId', async (req, res)=>{
+    const userId = req.params.userId;
+    connection.query(
+        `select * from likes where userId = '${userId}'`,
+        (err, rows) => {
+            if(err) res.send('no heart yet');
+            res.send(rows);
+        }
+    )
+})
+app.post('/addheart', async (req, res)=>{
+    const { userId, projectTitle, projectImg, releaseDate, deadLine} = req.body;
+    connection.query(
+        `insert into likes (userId, projectTitle, projectImg, releaseDate, deadLine) value(?,?,?,?,?)`,
+        [ userId, projectTitle, projectImg, releaseDate, deadLine ],
+        (err, rows) => {
+            if(err) console.log(err);
         }
     )
 })
