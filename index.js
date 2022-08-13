@@ -192,7 +192,7 @@ app.get('/projectlist/:name', async (req, res)=>{
         }
     )
 })
-//좋아요 기능
+//좋아요 가져오기
 app.get('/getheart/:userId', async (req, res)=>{
     const userId = req.params.userId;
     connection.query(
@@ -203,6 +203,7 @@ app.get('/getheart/:userId', async (req, res)=>{
         }
     )
 })
+//좋아요 넣기
 app.post('/addheart', async (req, res)=>{
     const { userId, projectTitle, projectImg, releaseDate, deadLine} = req.body;
     connection.query(
@@ -213,7 +214,15 @@ app.post('/addheart', async (req, res)=>{
         }
     )
 })
-
+//좋아요 삭제
+app.delete('/deleteheart/:title', async (req, res)=>{
+    const title = req.params.title;
+    connection.query(`delete from likes where projectTitle='${title}'`,
+    (err, rows)=>{
+        if(err) console.log(err);
+        res.send(rows);
+    })
+})
 //서버 돌리기
 app.listen(port, ()=>{
     console.log('comet is now running');
