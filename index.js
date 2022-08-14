@@ -196,7 +196,19 @@ app.get('/projectlist/:name', async (req, res)=>{
 app.get('/getheart/:userId', async (req, res)=>{
     const userId = req.params.userId;
     connection.query(
-        `select * from likes where userId = '${userId}'`,
+        `select projects.id as projectId,
+        likes.id,
+        likes.userId,
+        likes.projectTitle,
+        likes.projectImg,
+        likes.releaseDate,
+        likes.deadLine,
+        likes.projectPrice,
+        likes.projectAchieve,
+        likes.sellerId
+        from projects inner join
+        likes on projects.projectTitle = likes.projectTitle
+         where likes.userId = '${userId}';`,
         (err, rows) => {
             if(err) res.send('no heart yet');
             res.send(rows);
@@ -204,12 +216,12 @@ app.get('/getheart/:userId', async (req, res)=>{
     )
 })
 //좋아요 넣기
-app.post('/addheart', async (req, res)=>{
-    const { userId, projectTitle, projectImg, releaseDate, deadLine} = req.body;
+app.post('/addheart', async (req)=>{
+    const { userId, projectTitle, projectImg, releaseDate, deadLine, projectPrice, projectAchieve, sellerId} = req.body;
     connection.query(
-        `insert into likes (userId, projectTitle, projectImg, releaseDate, deadLine) value(?,?,?,?,?)`,
-        [ userId, projectTitle, projectImg, releaseDate, deadLine ],
-        (err, rows) => {
+        `insert into likes (userId, projectTitle, projectImg, releaseDate, deadLine, projectPrice, projectAchieve, sellerId) value(?,?,?,?,?,?,?,?)`,
+        [ userId, projectTitle, projectImg, releaseDate, deadLine, projectPrice, projectAchieve, sellerId ],
+        (err) => {
             if(err) console.log(err);
         }
     )
@@ -218,6 +230,15 @@ app.post('/addheart', async (req, res)=>{
 app.delete('/deleteheart/:title', async (req, res)=>{
     const title = req.params.title;
     connection.query(`delete from likes where projectTitle='${title}'`,
+    (err, rows)=>{
+        if(err) console.log(err);
+        res.send(rows);
+    })
+})
+//내가 올린 프로젝트 불러오기
+app.get('/myproject/:userId', async (req, res) =>{
+    const userId = req.params.userId;
+    connection.query(`select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where sellerId = '${userId}'`,
     (err, rows)=>{
         if(err) console.log(err);
         res.send(rows);
