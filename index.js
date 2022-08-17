@@ -193,6 +193,15 @@ app.get('/projectlist/:name', async (req, res)=>{
         }
     )
 })
+//프로젝트 타입으로 불러오기
+app.get('/projecttypelist/:type', async (req, res)=>{
+    const type = req.params.type;
+    connection.query(`select * from projects where projectType like '%${type}%'`,
+    (err, rows)=>{
+        if(err) console.log(err);
+        res.send(rows);
+    })
+})
 //좋아요 가져오기
 app.get('/getheart/:userId', async (req, res)=>{
     const userId = req.params.userId;
@@ -259,6 +268,32 @@ app.put(`/editproject/:id`, async (req, res)=>{
 //전체 프로젝트
 app.get('/getallproject', (req, res)=>{
     connection.query(`select * from projects`,
+    (err, rows)=>{
+        if(err) console.log(err);
+        res.send(rows);
+    })
+})
+//프로젝트 타이틀 중복 검사
+app.get('/getprojecttitle/:title',(req,res)=>{
+    const title = req.params.title;
+    connection.query(`select * from projects where projectTitle = '${title}'`,
+    (err, rows)=>{
+        if(err) console.log(err);
+        res.send(rows);
+    })
+})
+//프로젝트 후원하기
+app.post('/givesupport', (req, res)=>{
+    const {userId, sellerId, projectTitle, projectPrice, projectImg, releaseDate, deadLine, projectAchieve} = req.body;
+    connection.query(`insert into supported (userId, sellerId, projectTitle, projectPrice, projectImg, releaseDate, deadLine, projectAchieve)
+    value (?,?,?,?,?,?,?,?)`, [userId, sellerId, projectTitle, projectPrice, projectImg, releaseDate, deadLine, projectAchieve],
+    (err)=>{
+        if(err) console.log(err);
+    })
+})
+app.get('/mysupported/:userId', (req, res)=>{
+    const userId = req.params.userId;
+    connection.query(`select * from supported where userId=${userId}`,
     (err, rows)=>{
         if(err) console.log(err);
         res.send(rows);
