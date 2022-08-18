@@ -151,7 +151,7 @@ app.post('/loginuser', async (req, res)=>{
 app.get('/projectdetail/:id', async (req, res)=>{
     const id = req.params.id;
     connection.query(
-        `select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where id=${id}`,
+        `select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine, format(projectPrice, 0) as price, format(projectGoal, 0) as goal, format(projectAchieve, 0) as achieve from projects where id=${id}`,
         (err, rows)=>{
             if(err) return console.log(err);
             else res.send(rows[0]);
@@ -206,7 +206,7 @@ app.get('/projecttypelist/:type', async (req, res)=>{
 app.get('/getheart/:userId', async (req, res)=>{
     const userId = req.params.userId;
     connection.query(
-        `select * from likes where userId = '${userId}';`,
+        `select *,format(projectPrice, 0) as price, format(projectAchieve, 0) as achieve from likes where userId = '${userId}';`,
         (err, rows) => {
             if(err) res.send('no heart yet');
             res.send(rows);
@@ -235,7 +235,7 @@ app.delete('/deleteheart/:title', async (req, res)=>{
 //내가 올린 프로젝트 불러오기
 app.get('/myproject/:userId', async (req, res) =>{
     const userId = req.params.userId;
-    connection.query(`select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where sellerId = '${userId}'`,
+    connection.query(`select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine,format(projectPrice, 0) as price, format(projectGoal, 0) as goal, format(projectAchieve, 0) as achieve from projects where sellerId = '${userId}'`,
     (err, rows)=>{
         if(err) console.log(err);
         res.send(rows);
@@ -284,20 +284,48 @@ app.get('/getprojecttitle/:title',(req,res)=>{
 })
 //프로젝트 후원하기
 app.post('/givesupport', (req, res)=>{
-    const {userId, sellerId, projectTitle, projectPrice, projectImg, releaseDate, deadLine, projectAchieve} = req.body;
-    connection.query(`insert into supported (userId, sellerId, projectTitle, projectPrice, projectImg, releaseDate, deadLine, projectAchieve)
-    value (?,?,?,?,?,?,?,?)`, [userId, sellerId, projectTitle, projectPrice, projectImg, releaseDate, deadLine, projectAchieve],
+    console.log(req.body.projectId);
+    const {userId, sellerId, projectTitle, projectPrice, projectImg, releaseDate, deadLine, projectAchieve, projectGoal, projectId} = req.body;
+    connection.query(`insert into supported (userId, sellerId, projectTitle, projectPrice, projectImg, releaseDate, deadLine, projectAchieve, projectGoal, projectId)
+    value (?,?,?,?,?,?,?,?,?,?)`, [userId, sellerId, projectTitle, projectPrice, projectImg, releaseDate, deadLine, projectAchieve, projectGoal, projectId],
     (err)=>{
         if(err) console.log(err);
     })
 })
+//내 후원내역 불러오기
 app.get('/mysupported/:userId', (req, res)=>{
     const userId = req.params.userId;
-    connection.query(`select * from supported where userId=${userId}`,
+    connection.query(`select *,format(projectPrice, 0) as price, format(projectGoal, 0) as goal, format(projectAchieve, 0) as achieve from supported where userId='${userId}'`,
     (err, rows)=>{
         if(err) console.log(err);
         res.send(rows);
     })
+})
+//각 후원의 후원 Achievement 가져오기
+app.get('/supportachievement/:title', (req, res)=>{
+    const title = req.params.title;
+    connection.query(`select truncate(sum(projectPrice)*100 /projectGoal, 0) as achievement from supported where projectTitle ='${title}';`,
+    (err, rows)=> {
+        if(err) console.log(err);
+        res.send(rows);
+    })
+})
+//후원 Achievement 현황 업데이트 하기
+app.put('/updatesupportcondition/:title', (req, res)=>{
+    const newAchievement = req.body[0].achievement;
+    const title = req.params.title;
+    connection.query(`update projects set projectAchieve=${newAchievement} where projectTitle='${title}'`,
+    (err, rows)=>{
+        if(err) console.log(err);
+    })
+})
+//내 후원 취소하기
+app.delete('/supportcancel/:title', (req, res)=>{
+    const title = req.params.title;
+    connection.query(`delete from supported where projectTitle = '${title}'`,
+    (err)=>{
+        if(err) console.log(err)
+    });
 })
 //서버 돌리기
 app.listen(port, ()=>{
