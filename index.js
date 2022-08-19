@@ -246,7 +246,8 @@ app.delete('/deleteproject/:id', async (req, res)=>{
     const id = req.params.id;
     const projectDel = `delete from projects where id = ${id};`;
     const likeDel = `delete from likes where projectId = '${id}';`;
-    connection.query(projectDel + likeDel, (err)=>{
+    const supDel = `delete from supported where projectId = ${id};`;
+    connection.query(projectDel + likeDel + supDel, (err)=>{
         if(err) console.log(err);
     })
 })
@@ -284,7 +285,6 @@ app.get('/getprojecttitle/:title',(req,res)=>{
 })
 //프로젝트 후원하기
 app.post('/givesupport', (req, res)=>{
-    console.log(req.body.projectId);
     const {userId, sellerId, projectTitle, projectPrice, projectImg, releaseDate, deadLine, projectAchieve, projectGoal, projectId} = req.body;
     connection.query(`insert into supported (userId, sellerId, projectTitle, projectPrice, projectImg, releaseDate, deadLine, projectAchieve, projectGoal, projectId)
     value (?,?,?,?,?,?,?,?,?,?)`, [userId, sellerId, projectTitle, projectPrice, projectImg, releaseDate, deadLine, projectAchieve, projectGoal, projectId],
@@ -326,6 +326,15 @@ app.delete('/supportcancel/:title', (req, res)=>{
     (err)=>{
         if(err) console.log(err)
     });
+})
+//프로젝트 검색하기
+app.post('/searchingproject', (req, res)=>{
+    const { searchWord } = req.body;
+    connection.query(`select * from projects where projectTitle like '%${searchWord}%'`,
+    (err, rows)=>{
+        if(err) console.log(err);
+        res.send(rows);
+    })
 })
 //서버 돌리기
 app.listen(port, ()=>{
