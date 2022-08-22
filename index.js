@@ -7,6 +7,7 @@ const fs = require('fs');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const multer = require('multer');
+const upload = require('./multer.js');
 
 const dbinfo = fs.readFileSync('./database.json');
 const conf = JSON.parse(dbinfo);
@@ -24,21 +25,26 @@ app.use(express.json());
 app.use(cors());
 app.use("/upload", express.static("upload"));
 
-const storage = multer.diskStorage({
-    destination: "./upload",
-    filename: function(req, file, cb){
-        cb(null, file.originalname);
-    }
-})
-const upload = multer({
-    storage: storage,
-    limits: { fieldSize: 1000000}
-})
-app.post('/upload', upload.single('projectImg'), function(req, res, next){
-    res.send({
-        projectImg: req.file.filename 
-    })
-})
+app.post('/upload', upload.single('img'), (req, res, next) => {
+    res.status(201).send(req.file);
+});
+
+
+// const storage = multer.diskStorage({
+//     destination: "./upload",
+//     filename: function(req, file, cb){
+//         cb(null, file.originalname);
+//     }
+// })
+// const upload = multer({
+//     storage: storage,
+//     limits: { fieldSize: 1000000}
+// })
+// app.post('/upload', upload.single('projectImg'), function(req, res, next){
+//     res.send({
+//         projectImg: req.file.filename 
+//     })
+// })
 
 //인기 키워드 프로젝트
 app.get('/topranking', async (req, res)=>{
