@@ -25,10 +25,9 @@ app.use(express.json());
 app.use(cors());
 app.use("/upload", express.static("upload"));
 
-app.post('/upload', upload.single('img'), (req, res, next) => {
+app.post('/upload', upload.single('projectImg'), (req, res, next) => {
     res.status(201).send(req.file);
 });
-
 
 // const storage = multer.diskStorage({
 //     destination: "./upload",
