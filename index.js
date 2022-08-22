@@ -28,17 +28,7 @@ app.post('/upload', upload.single('projectImg'), (req, res, next) => {
     res.status(201).send(req.file);
 });
 
-const whitelist = ["https://comet-server.herokuapp.com/upload",];
- 
-const corsOptions = {
-  origin: function (origin, callback) { 
-    if (whitelist.indexOf(origin) !== -1) { // 만일 whitelist 배열에 origin인자가 있을 경우
-      callback(null, true); // cors 허용
-    } else {
-      callback(new Error("Not Allowed Origin!")); // cors 비허용
-    }
-  },
-};
+
  
 app.use(cors(corsOptions)); // 옵션을 추가한 CORS 미들웨어 추가
 // const storage = multer.diskStorage({
