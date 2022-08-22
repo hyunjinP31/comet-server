@@ -10,7 +10,8 @@ const upload = require('./multer.js');
 
 const dbinfo = fs.readFileSync('./database.json');
 const conf = JSON.parse(dbinfo);
-
+app.use(express.json());
+app.use(cors());
 
 const connection = mysql.createConnection({
     host: conf.host,
@@ -20,8 +21,7 @@ const connection = mysql.createConnection({
     database: conf.database,
     multipleStatements: true,
 });
-app.use(express.json());
-app.use(cors());
+
 app.use("/upload", express.static("upload"));
 
 app.post('/upload', upload.single('projectImg'), (req, res, next) => {
