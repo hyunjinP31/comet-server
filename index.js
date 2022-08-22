@@ -6,7 +6,6 @@ const mysql = require('mysql');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
-const multer = require('multer');
 const upload = require('./multer.js');
 
 const dbinfo = fs.readFileSync('./database.json');
