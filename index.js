@@ -28,9 +28,6 @@ app.post('/upload', upload.single('projectImg'), (req, res, next) => {
     res.status(201).send(req.file);
 });
 
-
- 
-app.use(cors(corsOptions)); // 옵션을 추가한 CORS 미들웨어 추가
 // const storage = multer.diskStorage({
 //     destination: "./upload",
 //     filename: function(req, file, cb){
