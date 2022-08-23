@@ -1,0 +1,7 @@
+{
+    "host" : "comet.cioafewefkse.us-east-1.rds.amazonaws.com",
+    "user": "root",
+    "password" : "123$567*",
+    "port" : 3306,
+    "database" : "comet"
+}

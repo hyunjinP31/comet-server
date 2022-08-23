@@ -2,12 +2,14 @@
 const multer = require('multer');
 const multerS3 = require('multer-s3')
 const AWS = require("aws-sdk");
-require('dotenv').config();
+const fs = require('fs');
+const access = fs.readFileSync('./s3.json');
+const acce = JSON.parse(access);
 
 const s3 = new AWS.S3({
-    accessKeyId: process.env.accessKeyId, // 액세스 키 입력
-    secretAccessKey: process.env.secretAccessKey, // 비밀 액세스 키 입력
-    region: process.env.region, // 사용자 사용 지역 (서울의 경우 ap-northeast-2)
+    accessKeyId: acce.accessKeyId, // 액세스 키 입력
+    secretAccessKey: acce.secretAccessKey, // 비밀 액세스 키 입력
+    region: acce.region, // 사용자 사용 지역 (서울의 경우 ap-northeast-2)
 });
 
 const upload = multer({ 

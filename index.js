@@ -3,19 +3,22 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 8080;
 const mysql = require('mysql');
+const fs = require('fs');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const upload = require('./multer.js');
-require('dotenv').config();
+
+const dbinfo = fs.readFileSync('./database.json');
+const conf = JSON.parse(dbinfo);
 app.use(express.json());
 app.use(cors());
 
 const connection = mysql.createConnection({
-    host: process.env.host,
-    user: process.env.user,
-    password: process.env.password,
-    port: process.env.port,
-    database: process.env.database,
+    host: conf.host,
+    user: conf.user,
+    password: conf.password,
+    port: conf.port,
+    database: conf.database,
     multipleStatements: true,
 });
 
