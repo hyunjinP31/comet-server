@@ -2,9 +2,6 @@
 const multer = require('multer');
 const multerS3 = require('multer-s3')
 const AWS = require("aws-sdk");
-const fs = require('fs');
-const access = fs.readFileSync('./s3.json');
-const acce = JSON.parse(access);
 require('dotenv').config();
 
 const s3 = new AWS.S3({

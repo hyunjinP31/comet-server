@@ -3,14 +3,10 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 8080;
 const mysql = require('mysql');
-const fs = require('fs');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const upload = require('./multer.js');
 require('dotenv').config();
-
-const dbinfo = fs.readFileSync('./database.json');
-const conf = JSON.parse(dbinfo);
 app.use(express.json());
 app.use(cors());
 
