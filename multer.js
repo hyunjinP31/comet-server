@@ -1,4 +1,4 @@
-// upload.js
+// aws s3를 이용해 이미지 업로드
 const multer = require('multer');
 const multerS3 = require('multer-s3')
 const AWS = require("aws-sdk");

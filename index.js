@@ -24,10 +24,12 @@ const connection = mysql.createConnection({
 
 app.use("/upload", express.static("upload"));
 
+//aws s3를 이용한 이미지 업로드
 app.post('/upload', upload.single('projectImg'), (req, res, next) => {
     res.status(201).send(req.file);
 });
 
+//로컬 개발 시 이미지 업로드
 // const storage = multer.diskStorage({
 //     destination: "./upload",
 //     filename: function(req, file, cb){
@@ -44,60 +46,75 @@ app.post('/upload', upload.single('projectImg'), (req, res, next) => {
 //     })
 // })
 
-//인기 키워드 프로젝트
-app.get('/topranking', async (req, res)=>{
-    connection.query(
-        "select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%인기%' order by projectAchieve desc limit 12",
-        (err, rows)=>{
-            res.send(rows);
-        }
-    )
+//다중 쿼리 전환 후 메인 화면 불러오기
+app.get('/mainprintprojects', async (req, res)=>{
+    const top = `select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%인기%' order by projectAchieve desc limit 12;`;
+    const immi = `select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%마감임박%' order by projectEndDate asc limit 10;`;
+    const theme = `select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%테마%' limit 10;`;
+    const newPro = `select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%신규%' order by projectStartDate desc limit 10;`;
+    const poten = `select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%주목%' order by projectHits desc limit 9;`;
+    const com = `select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%주목%' order by projectHits desc limit 9;`;
+    connection.query(top + immi + theme + newPro + poten + com, (err, result)=>{
+        if(err) console.log(err);
+        res.send(result);
+    })
 })
-//마감임박 키워드 프로젝트
-app.get('/imminent', async (req, res)=>{
-    connection.query(
-        "select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%마감임박%' order by projectEndDate asc limit 10",
-        (err, rows)=>{
-            res.send(rows);
-        }
-    )
-})
-//테마 키워드 프로젝트
-app.get('/theme', async (req, res)=>{
-    connection.query(
-        "select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%테마%' limit 10",
-        (err, rows)=>{
-            res.send(rows);
-        }
-    )
-})
-//신규 키워드 프로젝트
-app.get('/newproject', async (req, res)=>{
-    connection.query(
-        "select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%신규%' order by projectStartDate desc limit 10",
-        (err, rows)=>{
-            res.send(rows);
-        }
-    )
-})
-//주목 키워드 프로젝트
-app.get('/potenup', async (req, res)=>{
-    connection.query(
-        "select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%주목%' order by projectHits desc limit 9",
-        (err, rows)=>{
-            res.send(rows);
-        }
-    )
-})
-//공개예점 키워드 프로젝트
-app.get('/commingsoon', async (req, res)=>{
-    connection.query(
-        "select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%공개예정%' order by projectStartDate asc limit 12",
-        (err, rows)=>{
-            res.send(rows);
-        }
-    )
-})
+
+//다중 쿼리 전환 전 메인 화면 불러오기
+// //인기 키워드 프로젝트
+// app.get('/topranking', async (req, res)=>{
+//     connection.query(
+//         "select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%인기%' order by projectAchieve desc limit 12",
+//         (err, rows)=>{
+//             res.send(rows);
+//         }
+//     )
+// })
+// //마감임박 키워드 프로젝트
+// app.get('/imminent', async (req, res)=>{
+//     connection.query(
+//         "select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%마감임박%' order by projectEndDate asc limit 10",
+//         (err, rows)=>{
+//             res.send(rows);
+//         }
+//     )
+// })
+// //테마 키워드 프로젝트
+// app.get('/theme', async (req, res)=>{
+//     connection.query(
+//         "select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%테마%' limit 10",
+//         (err, rows)=>{
+//             res.send(rows);
+//         }
+//     )
+// })
+// //신규 키워드 프로젝트
+// app.get('/newproject', async (req, res)=>{
+//     connection.query(
+//         "select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%신규%' order by projectStartDate desc limit 10",
+//         (err, rows)=>{
+//             res.send(rows);
+//         }
+//     )
+// })
+// //주목 키워드 프로젝트
+// app.get('/potenup', async (req, res)=>{
+//     connection.query(
+//         "select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%주목%' order by projectHits desc limit 9",
+//         (err, rows)=>{
+//             res.send(rows);
+//         }
+//     )
+// })
+// //공개예점 키워드 프로젝트
+// app.get('/commingsoon', async (req, res)=>{
+//     connection.query(
+//         "select *, date_format(projectStartDate,'%Y-%m-%d') as releaseDate, date_format(projectEndDate,'%Y-%m-%d') as deadLine from projects where projectKeyword like '%공개예정%' order by projectStartDate asc limit 12",
+//         (err, rows)=>{
+//             res.send(rows);
+//         }
+//     )
+// })
 //회원정보 불러오기(id 중복 확인)
 app.get('/user/:userId', async (req, res)=>{
     const userId = req.params.userId;
